@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PortalPrompts Bot</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        :root {
+            --bg-main: #18191c;
+            --bg-sidebar: #1f2023;
+            --bg-card: #2b2d31;
+            --text-main: #f2f3f5;
+            --text-muted: #949ba4;
+            --accent-blue: #5865f2;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background-color: var(--bg-main);
+        }
+
+        .header {
+            padding: 15px 20px;
+            background-color: var(--bg-sidebar);
+            border-bottom: 1px solid #2e3035;
+        }
+
+        .chat-area {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .card {
+            background-color: var(--bg-card);
+            padding: 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: transform 0.2s;
+            border: 1px solid transparent;
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+            border-color: var(--accent-blue);
+        }
+
+        .card-title {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .card-desc {
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        .msg {
+            display: flex;
+            gap: 10px;
+            max-width: 80%;
+        }
+
+        .msg-avatar {
+            width: 35px;
+            height: 35px;
+            background-color: var(--accent-blue);
+            border-radius: 50%;
+        }
+
+        .msg-body {
+            background-color: var(--bg-card);
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .input-area {
+            padding: 20px;
+            background-color: var(--bg-main);
+        }
+
+        .input-wrapper {
+            background-color: var(--bg-sidebar);
+            padding: 12px;
+            border-radius: 8px;
+            display: flex;
+        }
+
+        .input-wrapper input {
+            flex: 1;
+            background: none;
+            border: none;
+            color: var(--text-main);
+            outline: none;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="main-content">
+        <div class="header">
+            <h3>🤖 masterprompts_bot <span style="font-size:12px; color:var(--accent-blue);">BOT</span></h3>
+        </div>
+
+        <div class="chat-area" id="chatArea">
+            <div class="msg">
+                <div class="msg-avatar"></div>
+                <div>
+                    <div class="msg-body">
+                        Olá! 👋 Seja muito bem-vindo ao <b>Prompts Rápidos</b>!<br><br>
+                        Qual tipo de prompt você deseja criar hoje? Escolha uma categoria abaixo ou digite detalhadamente no campo de texto o que você precisa.
+                        
+                        <div class="cards-grid">
+                            <div class="card" onclick="processarPedido('Marketing')">
+                                <div class="card-title">📢 Marketing</div>
+                                <div class="card-desc">Estratégias, posts, copys e anúncios.</div>
+                            </div>
+                            <div class="card" onclick="processarPedido('Vendas')">
+                                <div class="card-title">📈 Vendas</div>
+                                <div class="card-desc">Scripts de vendas, quebra de objeções e funis.</div>
+                            </div>
+                            <div class="card" onclick="processarPedido('Programação')">
+                                <div class="card-title">💻 Programação</div>
+                                <div class="card-desc">Códigos, automações e correção de bugs.</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="input-area" id="inputSection">
+            <div class="input-wrapper">
+                <input type="text" id="userInput" placeholder="Descreva o seu prompt aqui...">
+                <button onclick="enviarTexto()" style="background:none; border:none; color:var(--accent-blue); cursor:pointer; font-weight:bold; padding: 0 10px;">Enviar</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.expand();
+
+        function processarPedido(detalhes) {
+            // Mostra o balão do usuário na tela
+            const chat = document.getElementById('chatArea');
+            chat.innerHTML += `
+                <div class="msg" style="align-self: flex-end;">
+                    <div class="msg-body" style="background-color: var(--accent-blue);">Quero um prompt de: ${detalhes}</div>
+                </div>`;
+            
+            // Mensagem de espera automática
+            setTimeout(() => {
+                chat.innerHTML += `
+                    <div class="msg">
+                        <div class="msg-avatar"></div>
+                        <div>
+                            <div class="msg-body" style="border: 1px solid #23a55a;">
+                                ⏳ <b>Pedido recebido com sucesso!</b><br><br>
+                                Já estou preparando o seu prompt personalizado. Por favor, aguarde alguns instantes, você receberá a resposta diretamente aqui no nosso chat!
+                            </div>
+                        </div>
+                    </div>`;
+                
+                // Rola para o final da tela
+                chat.scrollTop = chat.scrollHeight;
+            }, 800);
+
+            // Envia as informações para o robô processar e te mandar no privado
+            tg.sendData(JSON.stringify({ pedido: detalhes }));
+            
+            // Oculta a área de input temporariamente para evitar cliques duplos
+            document.getElementById('inputSection').style.display = 'none';
+        }
+
+        function enviarTexto() {
+            const input = document.getElementById('userInput');
+            if (input.value.trim() !== "") {
+                processarPedido(input.value.trim());
+                input.value = "";
+            }
+        }
+    </script>
+</body>
+</html>
